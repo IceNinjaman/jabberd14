@@ -44,6 +44,7 @@
 #include <list>
 #include <iostream>
 
+
 // Tell gcrypt that we are using libpth - had to move this to a plain C file
 extern "C" void mio_tls_gcrypt_init(void);
 
@@ -466,6 +467,8 @@ static int const* mio_tls_compile_compression(pool p, const std::string& compres
     return result;
 }
 
+
+
 /**
  * process a configuration element configuring a set of credentials in the configuration file
  *
@@ -612,7 +615,7 @@ static void mio_tls_process_credentials(xmlnode x, const std::list<std::string>&
 	    }
 
 	    // load OpenPGP key/certificate
-	    ret = gnutls_certificate_set_openpgp_key_file(current_credentials, pubfile, privfile);
+	    ret = gnutls_certificate_set_openpgp_key_file(current_credentials, pubfile, privfile, OPENPGP_KEY_FORMAT);
 	    if (ret < 0) {
 		log_error(NULL, "Error loading OpenPGP key pub=%s/priv=%s: %s", pubfile, privfile, gnutls_strerror(ret));
 		continue;
@@ -631,7 +634,7 @@ static void mio_tls_process_credentials(xmlnode x, const std::list<std::string>&
 	    }
 
 	    // load the OpenPGP keyring
-	    ret = gnutls_certificate_set_openpgp_keyring_file(current_credentials, file);
+	    ret = gnutls_certificate_set_openpgp_keyring_file(current_credentials, file, OPENPGP_KEY_FORMAT);
 	    if (ret < 0) {
 		log_error(NULL, "Error loading OpenPGP keyring %s: %s", file, gnutls_strerror(ret));
 		continue;
@@ -648,13 +651,17 @@ static void mio_tls_process_credentials(xmlnode x, const std::list<std::string>&
 		log_warn(NULL, "Initializing TLS subsystem: <trustdb/> element inside the TLS configuration, that does not contain a file-name.");
 		continue;
 	    }
-
+	    #ifdef TLS_TRUSTDB_DISABLE
+		log_error(NULL, "Error loading GnuPG trustdb: Trust DB is unsupported in this build");
+		continue;
+	    #else
 	    // load the GnuPG trustdb
 	    ret = gnutls_certificate_set_openpgp_trustdb(current_credentials, file);
 	    if (ret < 0) {
 		log_error(NULL, "Error loading GnuPG trustdb %s: %s", file, gnutls_strerror(ret));
 		continue;
 	    }
+	    #endif
 	}
 
 	// setup protocols to use

@@ -910,8 +910,8 @@ xmlnode_list_item xmlnode_get_tags(xmlnode context_node, const char *path, xht n
     }
 
     /* separate this step from the next one, and check for a predicate in this step */
-    start_predicate = strchr(path, '[');
-    next_step = strchr(path, '/');
+    start_predicate = strchr((char*)path, '[');
+    next_step = strchr((char*)path, '/');
     if (start_predicate == NULL && next_step == NULL) {
 	this_step = pstrdup(p, path);
     } else if (start_predicate == NULL || start_predicate > next_step && next_step != NULL) {
@@ -1823,6 +1823,7 @@ xmlnode xmlnode_select_by_lang(xmlnode_list_item nodes, const char* lang) {
     xmlnode first_without_lang = NULL;
     xmlnode first_with_general_lang = NULL;
     char general_lang[32] = "";
+    char* lang2;
 
     /* santiy check */
     if (nodes == NULL) {
@@ -1832,8 +1833,10 @@ xmlnode xmlnode_select_by_lang(xmlnode_list_item nodes, const char* lang) {
     /* if language has a geographical veriant, get the language as well */
     if (lang != NULL && strchr(lang, '-') != NULL) {
 	snprintf(general_lang, sizeof(general_lang), "%s", lang);
-	if (strchr(lang, '-') != NULL) {
-	    strchr(lang, '-')[0] = 0;
+	lang2 = (char*)strchr(lang, '-');
+	if (lang2 != NULL)
+	{
+	    lang2[0] = 0;
 	} else {
 	    general_lang[0] = 0;
 	}

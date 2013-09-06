@@ -109,6 +109,12 @@
 #  include <gnutls/openpgp.h>
 #endif
 
+#ifndef OPENPGP_KEY_FORMAT
+#define OPENPGP_KEY_FORMAT GNUTLS_OPENPGP_FMT_BASE64
+#endif
+
+#define TLS_TRUSTDB_DISABLE
+
 /** Packet types */
 typedef enum { p_NONE, p_NORM, p_XDB, p_LOG, p_ROUTE } ptype;
 
