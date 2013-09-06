@@ -1217,7 +1217,13 @@ int _mio_tls_cont_handshake_server(mio m) {
  * @return -1 on error, 0 if the handshake has not yet finished, 1 on success
  */
 int _mio_ssl_accepted(mio m) {
-    return mio_ssl_starttls(m, 0, m->our_ip) == 0 ? 1 : -1;
+
+    if(mio_ssl_starttls(m, 0, m->our_ip))
+        return -1;
+
+    return 1;
+
+//    return mio_ssl_starttls(m, 0, m->our_ip) == 0 ? 1 : -1;
 }
 
 /**
@@ -1308,7 +1314,7 @@ int mio_ssl_starttls(mio m, int originator, const char* identity) {
     }
 
     // overwrite protocol priorities?
-    if (mio_tls_protocols.find(identity) != mio_tls_protocols.end()) {
+    if (identity != NULL && mio_tls_protocols.find(identity) != mio_tls_protocols.end()) {
 	ret = gnutls_protocol_set_priority(session, mio_tls_protocols[identity]);
 	if (ret < 0) {
 	    log_notice(identity, "error setting protocol priority: %s", gnutls_strerror(ret));
@@ -1321,7 +1327,7 @@ int mio_ssl_starttls(mio m, int originator, const char* identity) {
     }
 
     // overwrite kx algorithm priorities?
-    if (mio_tls_kx.find(identity) != mio_tls_kx.end()) {
+    if (identity != NULL && mio_tls_kx.find(identity) != mio_tls_kx.end()) {
 	ret = gnutls_kx_set_priority(session, mio_tls_kx[identity]);
 	if (ret < 0) {
 	    log_notice(identity, "error setting kx algorithm priority: %s", gnutls_strerror(ret));
@@ -1334,7 +1340,7 @@ int mio_ssl_starttls(mio m, int originator, const char* identity) {
     }
 
     // overwrite cipher priorities?
-    if (mio_tls_ciphers.find(identity) != mio_tls_ciphers.end()) {
+    if (identity != NULL && mio_tls_ciphers.find(identity) != mio_tls_ciphers.end()) {
 	ret = gnutls_cipher_set_priority(session, mio_tls_ciphers[identity]);
 	if (ret < 0) {
 	    log_notice(identity, "error setting cipher algorithm priority: %s", gnutls_strerror(ret));
@@ -1347,7 +1353,7 @@ int mio_ssl_starttls(mio m, int originator, const char* identity) {
     }
 
     // overwrite certificate priorities?
-    if (mio_tls_certtypes.find(identity) != mio_tls_certtypes.end()) {
+    if (identity != NULL && mio_tls_certtypes.find(identity) != mio_tls_certtypes.end()) {
 	ret = gnutls_certificate_type_set_priority(session, mio_tls_certtypes[identity]);
 	if (ret < 0) {
 	    log_notice(identity, "error setting certificate priorities: %s", gnutls_strerror(ret));
@@ -1360,7 +1366,7 @@ int mio_ssl_starttls(mio m, int originator, const char* identity) {
     }
 
     // overwrite mac algorithm priorities?
-    if (mio_tls_mac.find(identity) != mio_tls_mac.end()) {
+    if (identity != NULL && mio_tls_mac.find(identity) != mio_tls_mac.end()) {
 	ret = gnutls_mac_set_priority(session, mio_tls_mac[identity]);
 	if (ret < 0) {
 	    log_notice(identity, "error setting mac algorithm priorities: %s", gnutls_strerror(ret));
@@ -1373,7 +1379,7 @@ int mio_ssl_starttls(mio m, int originator, const char* identity) {
     }
 
     // overwrite compression algorithm priorities?
-    if (mio_tls_compression.find(identity) != mio_tls_compression.end()) {
+    if (identity != NULL && mio_tls_compression.find(identity) != mio_tls_compression.end()) {
 	ret = gnutls_compression_set_priority(session, mio_tls_compression[identity]);
 	if (ret < 0) {
 	    log_notice(identity, "error setting compression algorithm priorities: %s", gnutls_strerror(ret));
